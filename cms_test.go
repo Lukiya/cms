@@ -8,7 +8,7 @@ import (
 
 func Test_defaultCMS_GetHtml(t *testing.T) {
 	cp := sconfig.NewJsonConfigProvider()
-	a := NewDefaultCMS(cp)
+	a := NewJetHtmlCMS(cp)
 
 	params := MakeParams()
 	params.Set("s", []string{"zzz", "yyyy"})

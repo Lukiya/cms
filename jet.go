@@ -10,25 +10,47 @@ import (
 	"github.com/syncfuture/go/u"
 )
 
-func NewDefaultCMS(cp sconfig.IConfigProvider) ICMS {
+type IJetHtmlCMS interface {
+	ICMS
+	GetViewEngine() *jet.Set
+}
+
+func NewJetHtmlCMS(cp sconfig.IConfigProvider) IJetHtmlCMS {
 	var redisConfig *sredis.RedisConfig
 	cp.GetStruct("Redis", &redisConfig)
+	isDebug := cp.GetBool("Debug")
 
-	return &defaultCMS{
-		htmlCache: redis.NewRedisHtmlCache(redisConfig),
-		viewEngine: jet.NewSet(
+	var viewEngine *jet.Set
+	if isDebug {
+		// 调试
+		viewEngine = jet.NewSet(
 			redis.NewRedisTemplateLoader(redisConfig),
 			jet.InDevelopmentMode(),
-		),
+		)
+	} else {
+		// 生产
+		viewEngine = jet.NewSet(
+			redis.NewRedisTemplateLoader(redisConfig),
+		)
+	}
+
+	return &jetHtmlCMS{
+		cp:         cp,
+		htmlCache:  redis.NewRedisHtmlCache(redisConfig),
+		viewEngine: viewEngine,
 	}
 }
 
-type defaultCMS struct {
+type jetHtmlCMS struct {
 	htmlCache  dal.IHtmlCacheDAL
 	viewEngine *jet.Set
+	cp         sconfig.IConfigProvider
 }
 
-func (x *defaultCMS) GetHtml(key string, args ...interface{}) string {
+func (x *jetHtmlCMS) GetViewEngine() *jet.Set {
+	return x.viewEngine
+}
+func (x *jetHtmlCMS) GetHtml(key string, args ...interface{}) string {
 	r, err := x.htmlCache.GetHtml(key) // 查找缓存
 	if u.LogError(err) {
 		return ""
@@ -47,7 +69,7 @@ func (x *defaultCMS) GetHtml(key string, args ...interface{}) string {
 	return r
 }
 
-func (x *defaultCMS) Render(key string, args ...interface{}) (string, error) {
+func (x *jetHtmlCMS) Render(key string, args ...interface{}) (string, error) {
 	var params jet.VarMap
 
 	if len(args) > 0 { // 第一个参数作为 jet 数据模型
