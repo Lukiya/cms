@@ -1,11 +1,14 @@
 package cms
 
 import (
+	"strings"
+
 	"github.com/CloudyKit/jet/v6"
 	"github.com/Lukiya/cms/dal"
 	"github.com/Lukiya/cms/dal/redis"
 	"github.com/syncfuture/go/sconfig"
 	"github.com/syncfuture/go/serr"
+	log "github.com/syncfuture/go/slog"
 	"github.com/syncfuture/go/sredis"
 	"github.com/syncfuture/go/u"
 )
@@ -81,6 +84,10 @@ func (x *jetHtmlCMS) Render(key string, args ...interface{}) (string, error) {
 
 	template, err := x.viewEngine.GetTemplate(key) // 获取模板
 	if err != nil {
+		if strings.Contains(err.Error(), "not found") { // 没有找到模板，只记录debug信息
+			log.Debug(err.Error())
+			return "", nil
+		}
 		return "", serr.WithStack(err)
 	}
 
