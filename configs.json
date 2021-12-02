@@ -1,0 +1,9 @@
+{
+    "Redis": {
+        "Addrs": [
+            "192.168.188.166:6379"
+        ],
+        "Password": "Famous901"
+    },
+    "ListenAddr": ":8000"
+}
