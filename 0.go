@@ -12,6 +12,8 @@ type ICMS interface {
 	Render(key string, args ...interface{}) (string, error)
 }
 
+const _err1 = "could not be found"
+
 var (
 	_paramPool = sync.Pool{
 		New: func() interface{} {
