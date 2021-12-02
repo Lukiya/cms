@@ -6,4 +6,5 @@ import (
 
 type redisBase struct {
 	redisClient rV8.UniversalClient
+	key         string
 }

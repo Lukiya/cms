@@ -18,25 +18,26 @@ type IJetHtmlCMS interface {
 func NewJetHtmlCMS(cp sconfig.IConfigProvider) IJetHtmlCMS {
 	var redisConfig *sredis.RedisConfig
 	cp.GetStruct("Redis", &redisConfig)
+	cmsPrefix := cp.GetString("CMSPrefix")
 	isDebug := cp.GetBool("Debug")
 
 	var viewEngine *jet.Set
 	if isDebug {
 		// 调试
 		viewEngine = jet.NewSet(
-			redis.NewRedisTemplateLoader(redisConfig),
+			redis.NewRedisTemplateLoader(cmsPrefix+"TEMPLATE", redisConfig),
 			jet.InDevelopmentMode(),
 		)
 	} else {
 		// 生产
 		viewEngine = jet.NewSet(
-			redis.NewRedisTemplateLoader(redisConfig),
+			redis.NewRedisTemplateLoader(cmsPrefix+"TEMPLATE", redisConfig),
 		)
 	}
 
 	return &jetHtmlCMS{
 		cp:         cp,
-		htmlCache:  redis.NewRedisHtmlCache(redisConfig),
+		htmlCache:  redis.NewRedisHtmlCache(cmsPrefix+"HTML", redisConfig),
 		viewEngine: viewEngine,
 	}
 }

@@ -15,9 +15,10 @@ type RedisTemplateLoader struct {
 	redisBase
 }
 
-func NewRedisTemplateLoader(redisConfig *sredis.RedisConfig) jet.Loader {
+func NewRedisTemplateLoader(key string, redisConfig *sredis.RedisConfig) jet.Loader {
 	r := new(RedisTemplateLoader)
 	r.redisClient = sredis.NewClient(redisConfig)
+	r.key = key
 	return r
 }
 

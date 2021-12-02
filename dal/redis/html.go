@@ -9,9 +9,10 @@ import (
 	"github.com/syncfuture/go/sredis"
 )
 
-func NewRedisHtmlCache(redisConfig *sredis.RedisConfig) dal.IHtmlCacheDAL {
+func NewRedisHtmlCache(key string, redisConfig *sredis.RedisConfig) dal.IHtmlCacheDAL {
 	r := new(RedisHtmlCache)
 	r.redisClient = sredis.NewClient(redisConfig)
+	r.key = key
 	return r
 }
 
