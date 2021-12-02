@@ -74,6 +74,8 @@ func (x *jetHtmlCMS) GetHtml(key string, args ...interface{}) string {
 	return r
 }
 
+const _err1 = "could not be found"
+
 func (x *jetHtmlCMS) Render(key string, args ...interface{}) (string, error) {
 	var params jet.VarMap
 
@@ -84,7 +86,7 @@ func (x *jetHtmlCMS) Render(key string, args ...interface{}) (string, error) {
 
 	template, err := x.viewEngine.GetTemplate(key) // 获取模板
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") { // 没有找到模板，只记录debug信息
+		if strings.Contains(err.Error(), _err1) { // 没有找到模板，只记录debug信息
 			log.Debug(err.Error())
 			return "", nil
 		}
