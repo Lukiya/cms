@@ -8,5 +8,8 @@
         ],
         "Password": "Famous901"
     },
-    "CMSPrefix": "biz001:"
+    "CMS": {
+        "HtmlCacheKey": "biz001:HTML",
+        "TemplateKey": "biz001:TEMPLATE"
+    }
 }
