@@ -18,12 +18,12 @@ type RedisTemplateLoader struct {
 func NewRedisTemplateLoader(key string, redisConfig *sredis.RedisConfig) jet.Loader {
 	r := new(RedisTemplateLoader)
 	r.redisClient = sredis.NewClient(redisConfig)
-	r.key = key
+	r.redisKey = key
 	return r
 }
 
 func (x *RedisTemplateLoader) Exists(templatePath string) bool {
-	ex := x.redisClient.HExists(context.Background(), "xxx:TEMPLATE", templatePath)
+	ex := x.redisClient.HExists(context.Background(), x.redisKey, templatePath)
 	r, err := ex.Result()
 	if u.LogError(err) {
 		return false
@@ -33,7 +33,7 @@ func (x *RedisTemplateLoader) Exists(templatePath string) bool {
 }
 
 func (x *RedisTemplateLoader) Open(templatePath string) (io.ReadCloser, error) {
-	s := x.redisClient.HGet(context.Background(), "xxx:TEMPLATE", templatePath)
+	s := x.redisClient.HGet(context.Background(), x.redisKey, templatePath)
 	b, err := s.Bytes()
 	if err != nil {
 		return nil, serr.WithStack(err)

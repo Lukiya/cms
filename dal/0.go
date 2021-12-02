@@ -1,6 +1,6 @@
 package dal
 
 type IHtmlCacheDAL interface {
-	GetHtml(key string) (string, error)
-	SetHtml(key, value string) error
+	GetHtml(path string) (string, error)
+	SetHtml(path, value string) error
 }
