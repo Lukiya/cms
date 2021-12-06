@@ -68,15 +68,7 @@ func (x *jetCMS) GetContent(key string, args ...interface{}) string {
 		}
 
 		if r == "" { // 缓存为空
-			r, err = x.Render(key, args...) // 渲染
-			if err != nil {
-				if strings.Contains(err.Error(), _err1) { // 没有找到模板，只记录debug信息
-					slog.Debug(err.Error())
-				} else {
-					slog.Error(err)
-				}
-			}
-
+			r = x.render(key, args...) // 渲染
 			if r != "" {
 				err = x.htmlCache.SetContent(key, r) // 放入缓存
 				u.LogError(err)
