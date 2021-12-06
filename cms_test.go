@@ -9,7 +9,7 @@ import (
 
 func Test_defaultCMS_Render(t *testing.T) {
 	cp := sconfig.NewJsonConfigProvider()
-	a := NewJetHtmlCMS(cp)
+	a := NewJetCMS(cp)
 
 	params := MakeParams()
 	params.Set("s", []string{"zzz", "yyyy"})
@@ -21,11 +21,8 @@ func Test_defaultCMS_Render(t *testing.T) {
 
 func Test_defaultCMS_GetHtml(t *testing.T) {
 	cp := sconfig.NewJsonConfigProvider()
-	a := NewJetHtmlCMS(cp)
+	a := NewJetCMS(cp)
 
-	params := MakeParams()
-	params.Set("s", []string{"zzz", "yyyy"})
-
-	b := a.GetHtml("/", params)
+	b := a.GetContent("/css/site.css", nil, true)
 	t.Log(b)
 }

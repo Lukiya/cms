@@ -9,7 +9,7 @@
         "Password": "Famous901"
     },
     "CMS": {
-        "HtmlCacheKey": "biz001:HTML",
+        "ContentKey": "biz001:CONTENT",
         "TemplateKey": "biz001:TEMPLATE"
     }
 }

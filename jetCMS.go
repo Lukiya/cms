@@ -13,15 +13,15 @@ import (
 	"github.com/syncfuture/go/u"
 )
 
-type IJetHtmlCMS interface {
+type IJetCMS interface {
 	ICMS
 	GetViewEngine() *jet.Set
 }
 
-func NewJetHtmlCMS(cp sconfig.IConfigProvider) IJetHtmlCMS {
+func NewJetCMS(cp sconfig.IConfigProvider) IJetCMS {
 	var redisConfig *sredis.RedisConfig
 	cp.GetStruct("Redis", &redisConfig)
-	htmlCacheKey := cp.GetString("CMS.HtmlCacheKey")
+	htmlCacheKey := cp.GetString("CMS.ContentKey")
 	templateKey := cp.GetString("CMS.TemplateKey")
 	isDebug := cp.GetBool("Debug")
 
@@ -39,24 +39,24 @@ func NewJetHtmlCMS(cp sconfig.IConfigProvider) IJetHtmlCMS {
 		)
 	}
 
-	return &jetHtmlCMS{
+	return &jetCMS{
 		cp:         cp,
-		htmlCache:  redis.NewRedisHtmlCache(htmlCacheKey, redisConfig),
+		htmlCache:  redis.NewRedisContentDAL(htmlCacheKey, redisConfig),
 		viewEngine: viewEngine,
 	}
 }
 
-type jetHtmlCMS struct {
-	htmlCache  dal.IHtmlCacheDAL
+type jetCMS struct {
+	htmlCache  dal.IContentDAL
 	viewEngine *jet.Set
 	cp         sconfig.IConfigProvider
 }
 
-func (x *jetHtmlCMS) GetViewEngine() *jet.Set {
+func (x *jetCMS) GetViewEngine() *jet.Set {
 	return x.viewEngine
 }
-func (x *jetHtmlCMS) GetHtml(key string, args ...interface{}) string {
-	r, err := x.htmlCache.GetHtml(key) // 查找缓存
+func (x *jetCMS) GetContent(key string, args ...interface{}) string {
+	r, err := x.htmlCache.GetContent(key) // 查找缓存
 	if u.LogError(err) {
 		return ""
 	}
@@ -72,7 +72,17 @@ func (x *jetHtmlCMS) GetHtml(key string, args ...interface{}) string {
 		}
 
 		if r != "" {
-			err = x.htmlCache.SetHtml(key, r) // 放入缓存
+			if len(args) > 1 {
+				if ok := args[1].(bool); ok {
+					ctype := GetContentType(key)
+					r, err = _minifier.String(ctype, r)
+					if u.LogError(err) {
+						return ""
+					}
+				}
+			}
+
+			err = x.htmlCache.SetContent(key, r) // 放入缓存
 			u.LogError(err)
 		}
 	}
@@ -80,10 +90,10 @@ func (x *jetHtmlCMS) GetHtml(key string, args ...interface{}) string {
 	return r
 }
 
-func (x *jetHtmlCMS) Render(key string, args ...interface{}) (string, error) {
+func (x *jetCMS) Render(key string, args ...interface{}) (string, error) {
 	var params jet.VarMap
 
-	if len(args) > 0 { // 第一个参数作为 jet 数据模型
+	if len(args) > 0 && args[0] != nil { // 第一个参数作为 jet 数据模型
 		defer releaseParams(params) // 使用完毕释放
 		params = args[0].(jet.VarMap)
 	}

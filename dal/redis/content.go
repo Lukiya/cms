@@ -9,7 +9,7 @@ import (
 	"github.com/syncfuture/go/sredis"
 )
 
-func NewRedisHtmlCache(redisKey string, redisConfig *sredis.RedisConfig) dal.IHtmlCacheDAL {
+func NewRedisContentDAL(redisKey string, redisConfig *sredis.RedisConfig) dal.IContentDAL {
 	r := new(RedisHtmlCache)
 	r.redisClient = sredis.NewClient(redisConfig)
 	r.redisKey = redisKey
@@ -20,7 +20,7 @@ type RedisHtmlCache struct {
 	redisBase
 }
 
-func (x *RedisHtmlCache) GetHtml(path string) (string, error) {
+func (x *RedisHtmlCache) GetContent(path string) (string, error) {
 	cmd := x.redisClient.HGet(context.Background(), x.redisKey, path)
 	r, err := cmd.Result()
 	if err != nil {
@@ -41,7 +41,7 @@ func (x *RedisHtmlCache) Exists(path string) (bool, error) {
 	return r, nil
 }
 
-func (x *RedisHtmlCache) SetHtml(path, value string) error {
+func (x *RedisHtmlCache) SetContent(path, value string) error {
 	err := x.redisClient.HSet(context.Background(), x.redisKey, path, value).Err()
 	if err != nil {
 		return serr.WithStack(err)
