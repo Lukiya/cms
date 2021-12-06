@@ -19,10 +19,10 @@ func Test_defaultCMS_Render(t *testing.T) {
 	t.Log(b)
 }
 
-func Test_defaultCMS_GetHtml(t *testing.T) {
+func Test_defaultCMS_GetContent(t *testing.T) {
 	cp := sconfig.NewJsonConfigProvider()
 	a := NewJetCMS(cp)
 
-	b := a.GetContent("/css/site.css", nil, true)
+	b := a.GetContent("/", nil, false, true)
 	t.Log(b)
 }

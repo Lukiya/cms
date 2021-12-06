@@ -1,6 +1,7 @@
 package cms
 
 import (
+	"regexp"
 	"strings"
 	"sync"
 
@@ -11,6 +12,9 @@ import (
 	"github.com/tdewolff/minify/v2/css"
 	"github.com/tdewolff/minify/v2/html"
 	"github.com/tdewolff/minify/v2/js"
+	"github.com/tdewolff/minify/v2/json"
+	"github.com/tdewolff/minify/v2/svg"
+	"github.com/tdewolff/minify/v2/xml"
 )
 
 type ICMS interface {
@@ -32,10 +36,20 @@ var (
 
 func init() {
 	_minifier.AddFunc(shttp.CTYPE_CSS, css.Minify)
-	_minifier.AddFunc(shttp.CTYPE_HTML, html.Minify)
-	_minifier.AddFunc(shttp.CTYPE_JS, js.Minify)
+	_minifier.Add(shttp.CTYPE_HTML, &html.Minifier{
+		KeepComments:            false,
+		KeepConditionalComments: false,
+		KeepDefaultAttrVals:     false,
+		KeepDocumentTags:        false,
+		KeepEndTags:             false,
+		KeepQuotes:              true,
+		KeepWhitespace:          false,
+	})
+	_minifier.AddFunc("image/svg+xml", svg.Minify)
+	_minifier.AddFuncRegexp(regexp.MustCompile("^(application|text)/(x-)?(java|ecma)script$"), js.Minify)
+	_minifier.AddFuncRegexp(regexp.MustCompile("[/+]json$"), json.Minify)
+	_minifier.AddFuncRegexp(regexp.MustCompile("[/+]xml$"), xml.Minify)
 
-	// _minifier.AddFunc("image/svg+xml", svg.Minify)
 }
 
 func MakeParams() jet.VarMap {
@@ -54,6 +68,10 @@ func GetContentType(path string) string {
 		return shttp.CTYPE_CSS
 	} else if strings.HasSuffix(path, ".js") {
 		return shttp.CTYPE_JS
+	} else if strings.HasSuffix(path, ".xml") {
+		return shttp.CTYPE_XML
+	} else if strings.HasSuffix(path, ".json") {
+		return shttp.CTYPE_JSON
 	}
 	return shttp.CTYPE_HTML
 }

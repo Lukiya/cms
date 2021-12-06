@@ -56,34 +56,57 @@ func (x *jetCMS) GetViewEngine() *jet.Set {
 	return x.viewEngine
 }
 func (x *jetCMS) GetContent(key string, args ...interface{}) string {
-	r, err := x.htmlCache.GetContent(key) // 查找缓存
-	if u.LogError(err) {
-		return ""
+	cache := false
+	if len(args) > 1 { // 判断是否使用缓存
+		cache = args[1].(bool)
 	}
 
-	if r == "" { // 缓存为空
-		r, err = x.Render(key, args...) // 渲染
-		if err != nil {
-			if strings.Contains(err.Error(), _err1) { // 没有找到模板，只记录debug信息
-				slog.Debug(err.Error())
-			} else {
-				slog.Error(err)
-			}
+	if cache {
+		r, err := x.htmlCache.GetContent(key) // 查找缓存
+		if u.LogError(err) {
+			return ""
 		}
 
-		if r != "" {
-			if len(args) > 1 {
-				if ok := args[1].(bool); ok {
-					ctype := GetContentType(key)
-					r1, err := _minifier.String(ctype, r)
-					if !u.LogError(err) {
-						r = r1
-					}
+		if r == "" { // 缓存为空
+			r, err = x.Render(key, args...) // 渲染
+			if err != nil {
+				if strings.Contains(err.Error(), _err1) { // 没有找到模板，只记录debug信息
+					slog.Debug(err.Error())
+				} else {
+					slog.Error(err)
 				}
 			}
 
-			err = x.htmlCache.SetContent(key, r) // 放入缓存
-			u.LogError(err)
+			if r != "" {
+				err = x.htmlCache.SetContent(key, r) // 放入缓存
+				u.LogError(err)
+			}
+		}
+
+		return r
+	}
+
+	return x.render(key, args...)
+}
+
+func (x *jetCMS) render(key string, args ...interface{}) string {
+	r, err := x.Render(key, args...) // 渲染
+	if err != nil {
+		if strings.Contains(err.Error(), _err1) { // 没有找到模板，只记录debug信息，不当成错误
+			slog.Debug(err.Error())
+		} else {
+			slog.Error(err)
+		}
+	}
+
+	if r != "" && len(args) > 2 {
+		// 是否 minify
+		if ok := args[2].(bool); ok {
+			ctype := GetContentType(key)
+			r1, err := _minifier.String(ctype, r)
+			if !u.LogError(err) {
+				r = r1
+			}
 		}
 	}
 
