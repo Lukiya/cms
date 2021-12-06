@@ -75,9 +75,9 @@ func (x *jetCMS) GetContent(key string, args ...interface{}) string {
 			if len(args) > 1 {
 				if ok := args[1].(bool); ok {
 					ctype := GetContentType(key)
-					r, err = _minifier.String(ctype, r)
-					if u.LogError(err) {
-						return ""
+					r1, err := _minifier.String(ctype, r)
+					if !u.LogError(err) {
+						r = r1
 					}
 				}
 			}
