@@ -33,7 +33,7 @@ var (
 func init() {
 	_minifier.AddFunc(shttp.CTYPE_CSS, css.Minify)
 	_minifier.AddFunc(shttp.CTYPE_HTML, html.Minify)
-	_minifier.AddFunc(shttp.CTYPE_HTML, js.Minify)
+	_minifier.AddFunc(shttp.CTYPE_JS, js.Minify)
 
 	// _minifier.AddFunc("image/svg+xml", svg.Minify)
 }
