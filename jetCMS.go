@@ -1,6 +1,7 @@
 package cms
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/CloudyKit/jet/v6"
@@ -21,21 +22,39 @@ type IJetCMS interface {
 func NewJetCMS(cp sconfig.IConfigProvider) IJetCMS {
 	var redisConfig *sredis.RedisConfig
 	cp.GetStruct("Redis", &redisConfig)
+
 	htmlCacheKey := cp.GetString("CMS.ContentKey")
 	templateKey := cp.GetString("CMS.TemplateKey")
+
+	// Loader
+	loaderStoreProvider := cp.GetString("CMS.LoaderStore.Provider")
+	if loaderStoreProvider != "File" && loaderStoreProvider != "Redis" {
+		u.LogFaltal(errors.New("CMS.LoaderStore.Provider can only be ether 'File' or 'Redis'"))
+	}
+	viewsFileDirPath := cp.GetString("CMS.LoaderStore.File.DirPath")
+	if viewsFileDirPath == "" {
+		viewsFileDirPath = "./views"
+	}
+	var loaderStore jet.Loader
+	if loaderStoreProvider == "File" {
+		loaderStore = jet.NewOSFileSystemLoader(viewsFileDirPath)
+	} else if loaderStoreProvider == "Redis" {
+		loaderStore = redis.NewRedisTemplateLoader(templateKey, redisConfig)
+	}
+
 	isDebug := cp.GetBool("Debug")
 
 	var viewEngine *jet.Set
 	if isDebug {
 		// 调试
 		viewEngine = jet.NewSet(
-			redis.NewRedisTemplateLoader(templateKey, redisConfig),
+			loaderStore,
 			jet.InDevelopmentMode(),
 		)
 	} else {
 		// 生产
 		viewEngine = jet.NewSet(
-			redis.NewRedisTemplateLoader(templateKey, redisConfig),
+			loaderStore,
 		)
 	}
 
