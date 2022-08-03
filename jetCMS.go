@@ -29,7 +29,7 @@ func NewJetCMS(cp sconfig.IConfigProvider) IJetCMS {
 	// Loader
 	loaderStoreProvider := cp.GetString("CMS.LoaderStore.Provider")
 	if loaderStoreProvider != "File" && loaderStoreProvider != "Redis" {
-		u.LogFaltal(errors.New("CMS.LoaderStore.Provider can only be ether 'File' or 'Redis'"))
+		u.LogFatal(errors.New("CMS.LoaderStore.Provider can only be ether 'File' or 'Redis'"))
 	}
 	viewsFileDirPath := cp.GetString("CMS.LoaderStore.File.DirPath")
 	if viewsFileDirPath == "" {

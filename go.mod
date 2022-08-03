@@ -1,13 +1,13 @@
 module github.com/Lukiya/cms
 
-go 1.17
+go 1.18
 
 require (
 	github.com/CloudyKit/jet/v6 v6.1.0
-	github.com/go-redis/redis/v8 v8.11.4
-	github.com/stretchr/testify v1.7.0
-	github.com/syncfuture/go v1.7.0
-	github.com/tdewolff/minify/v2 v2.9.22
+	github.com/go-redis/redis/v8 v8.11.5
+	github.com/stretchr/testify v1.8.0
+	github.com/syncfuture/go v1.9.4
+	github.com/tdewolff/minify/v2 v2.12.0
 )
 
 require (
@@ -18,15 +18,14 @@ require (
 	github.com/kataras/golog v0.1.7 // indirect
 	github.com/kataras/pio v0.0.10 // indirect
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
-	github.com/lestrrat-go/strftime v1.0.5 // indirect
+	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/tdewolff/parse/v2 v2.5.22 // indirect
-	github.com/tidwall/gjson v1.10.2 // indirect
+	github.com/tdewolff/parse/v2 v2.6.1 // indirect
+	github.com/tidwall/gjson v1.14.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
-	golang.org/x/net v0.0.0-20210510120150-4163338589ed // indirect
-	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
+	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
