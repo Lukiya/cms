@@ -44,8 +44,8 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0 h1:pSgiaMZlXftHpm5L7V1+rVB+AZJydKsMxsQBIJw4PKk=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
-github.com/syncfuture/go v1.9.4 h1:IYmdiFSf9ztrstlJaMfBGRFKlum67cj8ndKy7zuAEcs=
-github.com/syncfuture/go v1.9.4/go.mod h1:JZN7185+NLZxQRzxftjkcgG4Q/vjDGCjhkY7i7VtPKQ=
+github.com/syncfuture/go v1.9.5 h1:VeNCt/AGTb7CRfvMNdg706N3tKqy/sqtmgMQLF9q8Kk=
+github.com/syncfuture/go v1.9.5/go.mod h1:ApYI3UqXKn1s/yvFWHEZyNff07YwutqKew/FyM7W6iw=
 github.com/tdewolff/minify/v2 v2.12.0 h1:ZyvMKeciyR3vzJrK/oHyBcSmpttQ/V+ah7qOqTZclaU=
 github.com/tdewolff/minify/v2 v2.12.0/go.mod h1:8mvf+KglD7XurfvvFZDUYvVURy6bA/r0oTvmakXMnyg=
 github.com/tdewolff/parse/v2 v2.6.1 h1:RIfy1erADkO90ynJWvty8VIkqqKYRzf2iLp8ObG174I=

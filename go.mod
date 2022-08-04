@@ -1,12 +1,12 @@
 module github.com/Lukiya/cms
 
-go 1.18
+go 1.19
 
 require (
 	github.com/CloudyKit/jet/v6 v6.1.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/stretchr/testify v1.8.0
-	github.com/syncfuture/go v1.9.4
+	github.com/syncfuture/go v1.9.5
 	github.com/tdewolff/minify/v2 v2.12.0
 )
 
