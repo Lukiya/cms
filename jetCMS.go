@@ -74,6 +74,8 @@ type jetCMS struct {
 func (x *jetCMS) GetViewEngine() *jet.Set {
 	return x.viewEngine
 }
+
+// GetContent 获取内容，args[0]指定是否使用缓存
 func (x *jetCMS) GetContent(key string, args ...interface{}) string {
 	cache := false
 	if len(args) > 1 { // 判断是否使用缓存
@@ -81,6 +83,7 @@ func (x *jetCMS) GetContent(key string, args ...interface{}) string {
 	}
 
 	if cache {
+		// 使用缓存
 		r, err := x.htmlCache.GetContent(key) // 查找缓存
 		if u.LogError(err) {
 			return ""
@@ -97,6 +100,7 @@ func (x *jetCMS) GetContent(key string, args ...interface{}) string {
 		return r
 	}
 
+	// 直接渲染
 	return x.render(key, args...)
 }
 

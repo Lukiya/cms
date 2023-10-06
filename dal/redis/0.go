@@ -1,10 +1,10 @@
 package redis
 
 import (
-	rV8 "github.com/go-redis/redis/v8"
+	rV9 "github.com/redis/go-redis/v9"
 )
 
 type redisBase struct {
-	redisClient rV8.UniversalClient
+	redisClient rV9.UniversalClient
 	redisKey    string
 }

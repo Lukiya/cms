@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/Lukiya/cms/dal"
-	rV8 "github.com/go-redis/redis/v8"
+	rV9 "github.com/redis/go-redis/v9"
 	"github.com/syncfuture/go/serr"
 	"github.com/syncfuture/go/sredis"
 )
@@ -24,7 +24,7 @@ func (x *RedisHtmlCache) GetContent(path string) (string, error) {
 	cmd := x.redisClient.HGet(context.Background(), x.redisKey, path)
 	r, err := cmd.Result()
 	if err != nil {
-		if err == rV8.Nil {
+		if err == rV9.Nil {
 			return "", nil // key不存在，不当作错误
 		}
 		return "", serr.WithStack(err)
