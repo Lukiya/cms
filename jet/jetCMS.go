@@ -3,7 +3,6 @@ package jet
 import (
 	"errors"
 	"strings"
-	"sync"
 
 	"github.com/CloudyKit/jet/v6"
 	"github.com/Lukiya/cms"
@@ -21,24 +20,9 @@ import (
 const _err1 = "could not be found"
 
 var (
-	_paramPool = sync.Pool{
-		New: func() interface{} {
-			r := make(jet.VarMap)
-			return &r
-		},
-	}
 	_bufferPool = spool.NewSyncBufferPool(1024)
 	_minifier   = minify.New()
 )
-
-func GetParams() *jet.VarMap {
-	return _paramPool.Get().(*jet.VarMap)
-}
-
-func ReleaseParams(params *jet.VarMap) {
-	*params = make(jet.VarMap)
-	_paramPool.Put(params)
-}
 
 type IJetCMS interface {
 	cms.ICMS
@@ -107,7 +91,7 @@ func (x *jetCMS) GetViewEngine() *jet.Set {
 
 // GetContent 获取内容
 // key: 内容键，一般为路径
-// arg[0]: *jet.VarMap，用cms.GetParams获取, 使用完毕用cms.ReleaseParams释放
+// arg[0]: *jet.GetParams获取, 使用完毕用jet.ReleaseParams释放
 // arg[1]: bool 是否使用缓存
 // arg[2]: bool 输出html是否压缩
 func (x *jetCMS) GetContent(key string, args ...interface{}) string {
@@ -140,7 +124,7 @@ func (x *jetCMS) GetContent(key string, args ...interface{}) string {
 
 // render 渲染内容
 // key: 内容键，一般为路径
-// arg[0]: *jet.VarMap，用cms.GetParams获取, 使用完毕用cms.ReleaseParams释放
+// arg[0]: *JetParams，用jet.GetParams获取, 使用完毕用jet.ReleaseParams释放
 // arg[1]: bool 是否使用缓存
 // arg[2]: bool 输出html是否minify
 func (x *jetCMS) render(key string, args ...interface{}) string {
@@ -169,14 +153,14 @@ func (x *jetCMS) render(key string, args ...interface{}) string {
 
 // Render 渲染内容
 // key: 内容键，一般为路径
-// arg[0]: *jet.VarMap，用cms.GetParams获取, 使用完毕用cms.ReleaseParams释放
+// arg[0]: *JetParams，用jet.GetParams获取, 使用完毕用jet.ReleaseParams释放
 // arg[1]: bool 是否使用缓存
 // arg[2]: bool 输出html是否压缩
 func (x *jetCMS) Render(key string, args ...interface{}) (string, error) {
-	var params *jet.VarMap
+	var params *JetParams
 
 	if len(args) > 0 && args[0] != nil { // 第一个参数作为 jet 数据模型
-		params = args[0].(*jet.VarMap)
+		params = args[0].(*JetParams)
 	}
 
 	template, err := x.viewEngine.GetTemplate(key) // 获取模板
@@ -187,7 +171,7 @@ func (x *jetCMS) Render(key string, args ...interface{}) (string, error) {
 	r := _bufferPool.GetBuffer()
 	defer _bufferPool.PutBuffer(r) // buffer使用完毕释放
 
-	err = template.Execute(r, *params, nil) // 执行渲染
+	err = template.Execute(r, *params.data, nil) // 执行渲染
 	if err != nil {
 		return "", serr.WithStack(err)
 	}
