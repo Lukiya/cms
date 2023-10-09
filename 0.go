@@ -52,11 +52,11 @@ func init() {
 
 }
 
-func MakeParams() jet.VarMap {
+func GetParams() jet.VarMap {
 	return _paramPool.Get().(jet.VarMap)
 }
 
-func releaseParams(params jet.VarMap) {
+func ReleaseParams(params jet.VarMap) {
 	for k := range params {
 		delete(params, k)
 	}

@@ -132,7 +132,6 @@ func (x *jetCMS) Render(key string, args ...interface{}) (string, error) {
 	var params jet.VarMap
 
 	if len(args) > 0 && args[0] != nil { // 第一个参数作为 jet 数据模型
-		defer releaseParams(params) // 使用完毕释放
 		params = args[0].(jet.VarMap)
 	}
 

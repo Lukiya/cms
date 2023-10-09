@@ -11,7 +11,7 @@ func Test_defaultCMS_Render(t *testing.T) {
 	cp := sconfig.NewJsonConfigProvider()
 	a := NewJetCMS(cp)
 
-	params := MakeParams()
+	params := GetParams()
 	params.Set("s", []string{"zzz", "yyyy"})
 
 	b, err := a.Render("/", params)
