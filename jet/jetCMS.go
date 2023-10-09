@@ -23,21 +23,20 @@ const _err1 = "could not be found"
 var (
 	_paramPool = sync.Pool{
 		New: func() interface{} {
-			return make(jet.VarMap)
+			r := make(jet.VarMap)
+			return &r
 		},
 	}
 	_bufferPool = spool.NewSyncBufferPool(1024)
 	_minifier   = minify.New()
 )
 
-func GetParams() jet.VarMap {
-	return _paramPool.Get().(jet.VarMap)
+func GetParams() *jet.VarMap {
+	return _paramPool.Get().(*jet.VarMap)
 }
 
-func ReleaseParams(params jet.VarMap) {
-	for k := range params {
-		delete(params, k)
-	}
+func ReleaseParams(params *jet.VarMap) {
+	*params = make(jet.VarMap)
 	_paramPool.Put(params)
 }
 
