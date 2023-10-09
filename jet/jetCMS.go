@@ -1,21 +1,48 @@
-package cms
+package jet
 
 import (
 	"errors"
 	"strings"
+	"sync"
 
 	"github.com/CloudyKit/jet/v6"
+	"github.com/Lukiya/cms"
 	"github.com/Lukiya/cms/dal"
 	"github.com/Lukiya/cms/dal/redis"
 	"github.com/syncfuture/go/sconfig"
 	"github.com/syncfuture/go/serr"
 	"github.com/syncfuture/go/slog"
+	"github.com/syncfuture/go/spool"
 	"github.com/syncfuture/go/sredis"
 	"github.com/syncfuture/go/u"
+	"github.com/tdewolff/minify/v2"
 )
 
+const _err1 = "could not be found"
+
+var (
+	_paramPool = sync.Pool{
+		New: func() interface{} {
+			return make(jet.VarMap)
+		},
+	}
+	_bufferPool = spool.NewSyncBufferPool(1024)
+	_minifier   = minify.New()
+)
+
+func GetParams() jet.VarMap {
+	return _paramPool.Get().(jet.VarMap)
+}
+
+func ReleaseParams(params jet.VarMap) {
+	for k := range params {
+		delete(params, k)
+	}
+	_paramPool.Put(params)
+}
+
 type IJetCMS interface {
-	ICMS
+	cms.ICMS
 	GetViewEngine() *jet.Set
 }
 
@@ -65,6 +92,10 @@ func NewJetCMS(cp sconfig.IConfigProvider) IJetCMS {
 	}
 }
 
+func NewCMS(cp sconfig.IConfigProvider) cms.ICMS {
+	return NewJetCMS(cp)
+}
+
 type jetCMS struct {
 	htmlCache  dal.IContentDAL
 	viewEngine *jet.Set
@@ -75,7 +106,11 @@ func (x *jetCMS) GetViewEngine() *jet.Set {
 	return x.viewEngine
 }
 
-// GetContent 获取内容，args[0]指定是否使用缓存
+// GetContent 获取内容
+// key: 内容键，一般为路径
+// arg[0]: jet.VarMap，用cms.GetParams获取, 使用完毕用cms.ReleaseParams释放
+// arg[1]: bool 是否使用缓存
+// arg[2]: bool 输出html是否压缩
 func (x *jetCMS) GetContent(key string, args ...interface{}) string {
 	cache := false
 	if len(args) > 1 { // 判断是否使用缓存
@@ -104,6 +139,11 @@ func (x *jetCMS) GetContent(key string, args ...interface{}) string {
 	return x.render(key, args...)
 }
 
+// render 渲染内容
+// key: 内容键，一般为路径
+// arg[0]: jet.VarMap，用cms.GetParams获取, 使用完毕用cms.ReleaseParams释放
+// arg[1]: bool 是否使用缓存
+// arg[2]: bool 输出html是否minify
 func (x *jetCMS) render(key string, args ...interface{}) string {
 	r, err := x.Render(key, args...) // 渲染
 	if err != nil {
@@ -117,7 +157,7 @@ func (x *jetCMS) render(key string, args ...interface{}) string {
 	if r != "" && len(args) > 2 {
 		// 是否 minify
 		if ok := args[2].(bool); ok {
-			ctype := GetContentType(key)
+			ctype := cms.GetContentType(key)
 			r1, err := _minifier.String(ctype, r)
 			if !u.LogError(err) {
 				r = r1
@@ -128,6 +168,11 @@ func (x *jetCMS) render(key string, args ...interface{}) string {
 	return r
 }
 
+// Render 渲染内容
+// key: 内容键，一般为路径
+// arg[0]: jet.VarMap，用cms.GetParams获取, 使用完毕用cms.ReleaseParams释放
+// arg[1]: bool 是否使用缓存
+// arg[2]: bool 输出html是否压缩
 func (x *jetCMS) Render(key string, args ...interface{}) (string, error) {
 	var params jet.VarMap
 

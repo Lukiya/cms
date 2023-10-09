@@ -3,11 +3,8 @@ package cms
 import (
 	"regexp"
 	"strings"
-	"sync"
 
-	"github.com/CloudyKit/jet/v6"
 	"github.com/syncfuture/go/shttp"
-	"github.com/syncfuture/go/spool"
 	"github.com/tdewolff/minify/v2"
 	"github.com/tdewolff/minify/v2/css"
 	"github.com/tdewolff/minify/v2/html"
@@ -18,20 +15,28 @@ import (
 )
 
 type ICMS interface {
+	// GetContent 获取内容
+	// key: 内容键，一般为路径
+	// arg[0]: 渲染使用的页面参数数据
+	// arg[1]: bool 是否使用缓存
+	// arg[2]: bool 输出html是否压缩
 	GetContent(key string, args ...interface{}) string
+	// GetContent 获取内容
+	// key: 内容键，一般为路径
+	// arg[0]: 渲染使用的页面参数数据
+	// arg[1]: bool 是否使用缓存
+	// arg[2]: bool 输出html是否压缩
 	Render(key string, args ...interface{}) (string, error)
 }
 
-const _err1 = "could not be found"
-
 var (
-	_paramPool = sync.Pool{
-		New: func() interface{} {
-			return make(jet.VarMap)
-		},
-	}
-	_bufferPool = spool.NewSyncBufferPool(1024)
-	_minifier   = minify.New()
+	// _paramPool = sync.Pool{
+	// 	New: func() interface{} {
+	// 		return make(jet.VarMap)
+	// 	},
+	// }
+	// _bufferPool = spool.NewSyncBufferPool(1024)
+	_minifier = minify.New()
 )
 
 func init() {
@@ -50,17 +55,6 @@ func init() {
 	_minifier.AddFuncRegexp(regexp.MustCompile("[/+]json$"), json.Minify)
 	_minifier.AddFuncRegexp(regexp.MustCompile("[/+]xml$"), xml.Minify)
 
-}
-
-func GetParams() jet.VarMap {
-	return _paramPool.Get().(jet.VarMap)
-}
-
-func ReleaseParams(params jet.VarMap) {
-	for k := range params {
-		delete(params, k)
-	}
-	_paramPool.Put(params)
 }
 
 func GetContentType(path string) string {
