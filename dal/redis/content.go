@@ -3,15 +3,15 @@ package redis
 import (
 	"context"
 
+	"github.com/DreamvatLab/go/xerr"
+	"github.com/DreamvatLab/go/xredis"
 	"github.com/Lukiya/cms/dal"
 	rV9 "github.com/redis/go-redis/v9"
-	"github.com/syncfuture/go/serr"
-	"github.com/syncfuture/go/sredis"
 )
 
-func NewRedisContentDAL(redisKey string, redisConfig *sredis.RedisConfig) dal.IContentDAL {
+func NewRedisContentDAL(redisKey string, redisConfig *xredis.RedisConfig) dal.IContentDAL {
 	r := new(RedisHtmlCache)
-	r.redisClient = sredis.NewClient(redisConfig)
+	r.redisClient = xredis.NewClient(redisConfig)
 	r.redisKey = redisKey
 	return r
 }
@@ -27,7 +27,7 @@ func (x *RedisHtmlCache) GetContent(path string) (string, error) {
 		if err == rV9.Nil {
 			return "", nil // key不存在，不当作错误
 		}
-		return "", serr.WithStack(err)
+		return "", xerr.WithStack(err)
 	}
 	return r, nil
 }
@@ -36,7 +36,7 @@ func (x *RedisHtmlCache) Exists(path string) (bool, error) {
 	cmd := x.redisClient.HExists(context.Background(), x.redisKey, path)
 	r, err := cmd.Result()
 	if err != nil {
-		return false, serr.WithStack(err)
+		return false, xerr.WithStack(err)
 	}
 	return r, nil
 }
@@ -44,7 +44,7 @@ func (x *RedisHtmlCache) Exists(path string) (bool, error) {
 func (x *RedisHtmlCache) SetContent(path, value string) error {
 	err := x.redisClient.HSet(context.Background(), x.redisKey, path, value).Err()
 	if err != nil {
-		return serr.WithStack(err)
+		return xerr.WithStack(err)
 	}
 	return nil
 }

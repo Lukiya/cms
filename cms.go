@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/syncfuture/go/shttp"
+	"github.com/DreamvatLab/go/xhttp"
 	"github.com/tdewolff/minify/v2"
 	"github.com/tdewolff/minify/v2/css"
 	"github.com/tdewolff/minify/v2/html"
@@ -35,13 +35,13 @@ var (
 	// 		return make(jet.VarMap)
 	// 	},
 	// }
-	// _bufferPool = spool.NewSyncBufferPool(1024)
+	// _bufferPool = xsync.NewSyncBufferPool(1024)
 	_minifier = minify.New()
 )
 
 func init() {
-	_minifier.AddFunc(shttp.CTYPE_CSS, css.Minify)
-	_minifier.Add(shttp.CTYPE_HTML, &html.Minifier{
+	_minifier.AddFunc(xhttp.CTYPE_CSS, css.Minify)
+	_minifier.Add(xhttp.CTYPE_HTML, &html.Minifier{
 		KeepComments:            false,
 		KeepConditionalComments: false,
 		KeepDefaultAttrVals:     false,
@@ -59,13 +59,13 @@ func init() {
 
 func GetContentType(path string) string {
 	if strings.HasSuffix(path, ".css") {
-		return shttp.CTYPE_CSS
+		return xhttp.CTYPE_CSS
 	} else if strings.HasSuffix(path, ".js") {
-		return shttp.CTYPE_JS
+		return xhttp.CTYPE_JS
 	} else if strings.HasSuffix(path, ".xml") {
-		return shttp.CTYPE_XML
+		return xhttp.CTYPE_XML
 	} else if strings.HasSuffix(path, ".json") {
-		return shttp.CTYPE_JSON
+		return xhttp.CTYPE_JSON
 	}
-	return shttp.CTYPE_HTML
+	return xhttp.CTYPE_HTML
 }

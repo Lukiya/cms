@@ -5,22 +5,22 @@ import (
 	"strings"
 
 	"github.com/CloudyKit/jet/v6"
+	"github.com/DreamvatLab/go/xbytes"
+	"github.com/DreamvatLab/go/xconfig"
+	"github.com/DreamvatLab/go/xerr"
+	"github.com/DreamvatLab/go/xlog"
+	"github.com/DreamvatLab/go/xredis"
+	"github.com/DreamvatLab/go/xsync"
 	"github.com/Lukiya/cms"
 	"github.com/Lukiya/cms/dal"
 	"github.com/Lukiya/cms/dal/redis"
-	"github.com/syncfuture/go/sconfig"
-	"github.com/syncfuture/go/serr"
-	"github.com/syncfuture/go/slog"
-	"github.com/syncfuture/go/spool"
-	"github.com/syncfuture/go/sredis"
-	"github.com/syncfuture/go/u"
 	"github.com/tdewolff/minify/v2"
 )
 
 const _err1 = "could not be found"
 
 var (
-	_bufferPool = spool.NewSyncBufferPool(1024)
+	_bufferPool = xsync.NewSyncBufferPool(1024)
 	_minifier   = minify.New()
 )
 
@@ -29,8 +29,8 @@ type IJetCMS interface {
 	GetViewEngine() *jet.Set
 }
 
-func NewJetCMS(cp sconfig.IConfigProvider) IJetCMS {
-	var redisConfig *sredis.RedisConfig
+func NewJetCMS(cp xconfig.IConfigProvider) IJetCMS {
+	var redisConfig *xredis.RedisConfig
 	cp.GetStruct("Redis", &redisConfig)
 
 	htmlCacheKey := cp.GetString("CMS.ContentKey")
@@ -39,7 +39,7 @@ func NewJetCMS(cp sconfig.IConfigProvider) IJetCMS {
 	// Loader
 	loaderStoreProvider := cp.GetString("CMS.LoaderStore.Provider")
 	if loaderStoreProvider != "File" && loaderStoreProvider != "Redis" {
-		u.LogFatal(errors.New("CMS.LoaderStore.Provider can only be ether 'File' or 'Redis'"))
+		xerr.FatalIfErr(errors.New("CMS.LoaderStore.Provider can only be ether 'File' or 'Redis'"))
 	}
 	viewsFileDirPath := cp.GetString("CMS.LoaderStore.File.DirPath")
 	if viewsFileDirPath == "" {
@@ -75,14 +75,14 @@ func NewJetCMS(cp sconfig.IConfigProvider) IJetCMS {
 	}
 }
 
-func NewCMS(cp sconfig.IConfigProvider) cms.ICMS {
+func NewCMS(cp xconfig.IConfigProvider) cms.ICMS {
 	return NewJetCMS(cp)
 }
 
 type jetCMS struct {
 	htmlCache  dal.IContentDAL
 	viewEngine *jet.Set
-	cp         sconfig.IConfigProvider
+	cp         xconfig.IConfigProvider
 }
 
 func (x *jetCMS) GetViewEngine() *jet.Set {
@@ -103,7 +103,7 @@ func (x *jetCMS) GetContent(key string, args ...interface{}) string {
 	if cache {
 		// 使用缓存
 		r, err := x.htmlCache.GetContent(key) // 查找缓存
-		if u.LogError(err) {
+		if xerr.LogError(err) {
 			return ""
 		}
 
@@ -111,7 +111,7 @@ func (x *jetCMS) GetContent(key string, args ...interface{}) string {
 			r = x.render(key, args...) // 渲染
 			if r != "" {
 				err = x.htmlCache.SetContent(key, r) // 放入缓存
-				u.LogError(err)
+				xerr.LogError(err)
 			}
 		}
 
@@ -131,9 +131,9 @@ func (x *jetCMS) render(key string, args ...interface{}) string {
 	r, err := x.Render(key, args...) // 渲染
 	if err != nil {
 		if strings.Contains(err.Error(), _err1) { // 没有找到模板，只记录debug信息，不当成错误
-			slog.Debug(err.Error())
+			xlog.Debug(err.Error())
 		} else {
-			slog.Error(err)
+			xlog.Error(err)
 		}
 	}
 
@@ -142,7 +142,7 @@ func (x *jetCMS) render(key string, args ...interface{}) string {
 		if ok := args[2].(bool); ok {
 			ctype := cms.GetContentType(key)
 			r1, err := _minifier.String(ctype, r)
-			if !u.LogError(err) {
+			if !xerr.LogError(err) {
 				r = r1
 			}
 		}
@@ -165,7 +165,7 @@ func (x *jetCMS) Render(key string, args ...interface{}) (string, error) {
 
 	template, err := x.viewEngine.GetTemplate(key) // 获取模板
 	if err != nil {
-		return "", serr.WithStack(err)
+		return "", xerr.WithStack(err)
 	}
 
 	r := _bufferPool.GetBuffer()
@@ -173,7 +173,7 @@ func (x *jetCMS) Render(key string, args ...interface{}) (string, error) {
 
 	err = template.Execute(r, *params.data, nil) // 执行渲染
 	if err != nil {
-		return "", serr.WithStack(err)
+		return "", xerr.WithStack(err)
 	}
-	return u.BytesToStr(r.Bytes()), nil
+	return xbytes.BytesToStr(r.Bytes()), nil
 }
